@@ -30,30 +30,29 @@ func main() {
 		println("------- GSE cut search --------")
 		tokenizeByGseCutSearch(text, seg)
 		println("------- Kagome ipa mode=Normal --------")
-		tokenizeByKagome(text, tokenizer.Normal)
+		tokenizeByKagome(text, tokenizer.SysDicIPA(), tokenizer.Normal)
 		println("------- Kagome ipa mode=Search --------")
-		tokenizeByKagome(text, tokenizer.Search)
+		tokenizeByKagome(text, tokenizer.SysDicIPA(), tokenizer.Search)
+		println("------- Kagome uni mode=Normal --------")
+		tokenizeByKagome(text, tokenizer.SysDicUni(), tokenizer.Normal)
 	}
 
 }
 
-func tokenizeByGse(text string, seg gse.Segmenter) error {
+func tokenizeByGse(text string, seg gse.Segmenter) {
 	fmt.Println(seg.Cut(text))
-	return nil
 }
 
-func tokenizeByGseCutAll(text string, seg gse.Segmenter) error {
+func tokenizeByGseCutAll(text string, seg gse.Segmenter) {
 	fmt.Println(seg.CutAll(text))
-	return nil
 }
 
-func tokenizeByGseCutSearch(text string, seg gse.Segmenter) error {
+func tokenizeByGseCutSearch(text string, seg gse.Segmenter) {
 	fmt.Println(seg.CutSearch(text))
-	return nil
 }
 
-func tokenizeByKagome(text string, mode tokenizer.TokenizeMode) error {
-	t := tokenizer.New()
+func tokenizeByKagome(text string, dict tokenizer.Dic, mode tokenizer.TokenizeMode) {
+	t := tokenizer.NewWithDic(dict)
 	tokens := t.Analyze(text, mode)
 	print("[")
 	for _, token := range tokens {
@@ -63,6 +62,4 @@ func tokenizeByKagome(text string, mode tokenizer.TokenizeMode) error {
 		}
 	}
 	println("]")
-
-	return nil
 }
