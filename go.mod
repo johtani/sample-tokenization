@@ -11,7 +11,4 @@ require (
 	golang.org/x/text v0.19.0
 )
 
-require (
-	github.com/ikawaha/kagome-dict-ipa-neologd v0.3.2 // indirect
-	github.com/vcaesar/cedar v0.20.1 // indirect
-)
+require github.com/vcaesar/cedar v0.20.1 // indirect

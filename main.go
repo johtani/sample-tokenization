@@ -7,7 +7,9 @@ import (
 	"github.com/ikawaha/kagome-dict/ipa"
 	"github.com/ikawaha/kagome-dict/uni"
 	"github.com/ikawaha/kagome/v2/tokenizer"
+	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
+	"golang.org/x/text/width"
 )
 
 func main() {
@@ -42,12 +44,15 @@ func main() {
 		"ｺｽﾄｺ",
 		"サーキユﾚｰﾀｰ",
 		"ペンギン",
+		"㌔",
+		"\u30DB\u309A",
 	}
 	var seg gse.Segmenter
 	err := seg.LoadDict("ja")
 	if err != nil {
 		panic(err)
 	}
+	normalizer := transform.Chain(width.Fold, norm.NFC)
 
 	for _, text := range texts {
 		println("===========================================")
@@ -63,8 +68,12 @@ func main() {
 		tokenizeByKagome(text, ipa.Dict(), tokenizer.Search)
 		println("------- Kagome uni mode=Normal --------")
 		tokenizeByKagome(text, uni.Dict(), tokenizer.Normal)
-		println("------- NFKC string --------")
+		println("------- text/unicode/norm string --------")
 		normalize(text)
+		println("------- text/width string --------")
+		folding(text)
+		println("------- Fold + NFC string --------")
+		transforming(normalizer, text)
 	}
 
 }
@@ -97,9 +106,26 @@ func tokenizeByKagome(text string, dict *dict.Dict, mode tokenizer.TokenizeMode)
 	println("]")
 }
 
+func transforming(t transform.Transformer, text string) {
+	result, n, err := transform.String(t, text)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(fmt.Sprintf("[%s]/ n:[%d] len[%d] runes[%d]", result, n, len(result), len([]rune(result))))
+}
+
+func folding(text string) {
+	widen := width.Widen.String(text)
+	narrow := width.Narrow.String(text)
+	fold := width.Fold.String(text)
+	fmt.Print(fmt.Sprintf("Widen[%s]\nNarrow:[%s]\nFold:[%s]", widen, narrow, fold))
+	fmt.Println(fmt.Sprintf("runes:[%d, %d, %d]", len([]rune(widen)), len([]rune(narrow)), len([]rune(fold))))
+}
+
 func normalize(text string) {
-	fmt.Println(fmt.Sprintf("orig: %d, %d", len(text), len([]rune(text))))
+	fmt.Println(fmt.Sprintf("orig: len[%d], runes[%d]", len(text), len([]rune(text))))
+	fmt.Println(fmt.Sprintf("NFKC:[%s]\nNFC :[%s]\nNFD :[%s],\nNFKD:[%s]", norm.NFKC.String(text), norm.NFC.String(text), norm.NFD.String(text), norm.NFKD.String(text)))
 	normalized := norm.NFKC.String(text)
 	println(normalized)
-	fmt.Println(fmt.Sprintf("norm: %d, %d", len(normalized), len([]rune(normalized))))
+	fmt.Println(fmt.Sprintf("norm: len[%d], runes[%d]", len(normalized), len([]rune(normalized))))
 }
