@@ -7,6 +7,7 @@ import (
 	"github.com/ikawaha/kagome-dict/ipa"
 	"github.com/ikawaha/kagome-dict/uni"
 	"github.com/ikawaha/kagome/v2/tokenizer"
+	"golang.org/x/text/unicode/norm"
 )
 
 func main() {
@@ -35,6 +36,12 @@ func main() {
 		"すばやいちゃいろのきつねがなまけたいぬをとびこえた",
 		"スバヤイチャイロノキツネガナマケタイヌヲトビコエタ",
 		"The quick brown fox jumps over the lazy dog",
+		"早稲田大学",
+		"早稲田大学（基幹理工学部・創造理工学部・先進理工学部） (2021年版大学入試シリーズ)",
+		"ｍillefiori",
+		"ｺｽﾄｺ",
+		"サーキユﾚｰﾀｰ",
+		"ペンギン",
 	}
 	var seg gse.Segmenter
 	err := seg.LoadDict("ja")
@@ -56,6 +63,8 @@ func main() {
 		tokenizeByKagome(text, ipa.Dict(), tokenizer.Search)
 		println("------- Kagome uni mode=Normal --------")
 		tokenizeByKagome(text, uni.Dict(), tokenizer.Normal)
+		println("------- NFKC string --------")
+		normalize(text)
 	}
 
 }
@@ -86,4 +95,11 @@ func tokenizeByKagome(text string, dict *dict.Dict, mode tokenizer.TokenizeMode)
 		}
 	}
 	println("]")
+}
+
+func normalize(text string) {
+	fmt.Println(fmt.Sprintf("orig: %d, %d", len(text), len([]rune(text))))
+	normalized := norm.NFKC.String(text)
+	println(normalized)
+	fmt.Println(fmt.Sprintf("norm: %d, %d", len(normalized), len([]rune(normalized))))
 }
